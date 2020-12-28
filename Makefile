@@ -3,7 +3,10 @@ SHELL != which bash
 contents := $(wildcard content/*.rst)
 
 content.py: items.py
-	printf "%b" "from items import items as items\n\ncontents = (\n" > $@
+	printf "%b" 'from items import items as items\n\nABOUT = """\n' > $@
+	cat ABOUT.md >> $@;
+	printf "%s\n\n" '""";' >> $@;
+	printf "%b" "contents = (\n" >> $@
 	for f in $(contents); \
 	    do printf "%s\n" '"""' >> $@; \
 	    cat $${f} >> $@; \
