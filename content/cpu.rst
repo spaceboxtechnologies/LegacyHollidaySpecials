@@ -61,6 +61,9 @@ The Central Processing Unit (CPU)
           to solve problems you never anticipated during its creation. Below is
           a table that explicitly defines the problem's scope:
         
+        Table 1
+        _______
+
           ======   ======    ===== ======
           digit1 + digit2 =  carry result
           ======   ======    ===== ======
@@ -99,7 +102,7 @@ The Central Processing Unit (CPU)
 
           |                     |
         --°--                |--°--|
-        The lead             |     |
+        The lid              |     |
                              |     |
                              |     |
 
@@ -112,15 +115,7 @@ The Central Processing Unit (CPU)
         time in response to weight (like a scale). Let's demonstrate this
         mechanism by putting a box on it.
 
-         |               | /
-       []|               |/
-      |--°--|        |   /  |
-      |     |        |[]/   |
-
-      action         result (box slide into the tube).
-
-
-
+      (i).
 
          |               | /
        []|               |/
@@ -128,3 +123,56 @@ The Central Processing Unit (CPU)
       |     |        |[]/   |
 
       action         result (box slide into the tube).
+
+
+      (ii).
+
+         |             \ | 
+         |[]            \|
+      |--°--|        |   \   |
+      |     |        |    \[]|
+
+      action         result (box slide into the tube again).
+
+
+      (iii).
+
+         |              |   
+       []|[]          []|[] 
+      |--°--|        |--°--|
+      |     |        |     |
+
+      action         result (since the boxes are of equal mass, their weights balance each
+      other out. So, nobody will go in).
+
+
+      So, those our circuit mimic the behavior specified in table 1 above? 
+
+          ||      ||
+          ||      ||
+          ||______||
+          |___°°___|
+              ||
+              ||
+              ||
+              ||
+        zooming out of our toy.
+
+      
+      Not quite, no room for carries. Using the model we agreed-on (water in a
+      tube is a 1, empty tube is a 0), we can add 0 to 0, 1 to 0, 0 to 1 - all
+      by pouring water into the input tubes correspondingly. However, everything
+      breaks when we add 1 to 1 - we get a 0 output. Our carry is lost. Let's
+      fix this.
+
+          | |       | |
+          | |       | |
+          | |__   __| |
+          |           |
+          |____°°°____|
+               | |
+               | |
+               | |
+               | |
+
+        to be continued...

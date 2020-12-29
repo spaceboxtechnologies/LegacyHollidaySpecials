@@ -20,8 +20,9 @@ NO_CONTENT = "Content coming soon..."
 
 def start(win, init, deinit):
     def uninstall():
-        nonlocal frame, win
-        frame.destroy();
+        nonlocal lframe, rframe, win
+        lframe.destroy();
+        rframe.destroy();
         win.protocol("WM_DELETE_WINDOW", lambda : win.destroy());
         init(win);
 
@@ -31,75 +32,83 @@ def start(win, init, deinit):
         ids = items_listbox.curselection();
         if not ids:
             return
-        text_space.itemconfigure(tid, state = "normal");
-        text_space.delete(tid, "1.0", "end"); 
-        text_space.insert(tid, "1.0", content.contents[ids[0]]); 
+        text_space.itemconfigure(
+                tid,
+                text = content.contents[ids[0]] + ("" if len(content.contents[ids[0]].split("\n")) > 5 else "\n%s" % (NO_CONTENT,)),
+                justify = tkinter.LEFT
+                );
+        text_space.configure(scrollregion = text_space.bbox("all"));
+        text_space.xview("scroll", -MAX_COLS, "units");
 
-        if int(text_space.index(tid, 'end - 1 line').split('.')[0]) <= 4:
-            text_space.insert(tid, "end", "\n%s" % (NO_CONTENT,)); 
+    def onMouseScroll(e):
+        text_space.yview("scroll", -1*(e.delta//SCROLL_GRAN), "units")
 
-        text_space.itemconfigure(tid, state = "disabled");
 
     deinit();
     items_var = tkinter.StringVar(value = content.items);
-    frame = tkinter.ttk.Frame(win, height = WIN_HEIGHT, width = WIN_WIDTH, takefocus = 1);
-    frame.grid(column = 0, row = 0, sticky = (tkinter.N, tkinter.S, tkinter.W, tkinter.E));
-    frame.rowconfigure(0, weight = 1, pad = 0);
-    frame.columnconfigure(0, weight = 1, pad = 0);
+    lframe = tkinter.ttk.Frame(win, height = WIN_HEIGHT);
+    lframe.place(x = 0, y = 0, relwidth = 0.2, relheight = 1);
 
-    items_listbox = tkinter.Listbox(frame, width = 30, height = WIN_HEIGHT, listvariable = items_var);
-    items_listbox.grid(column = 0, row = 3, pady = 5, padx = 5);
-    items_listbox.columnconfigure(0, weight = 1, pad = 5);
+    rframe = tkinter.ttk.Frame(win, height = WIN_HEIGHT);
+    rframe.place(relx= 0.3, y = 0, relwidth = 0.7, relheight = 1);
 
-    vscrollbar = tkinter.Scrollbar(frame, width = 20, orient = tkinter.VERTICAL, command =
+    items_listbox = tkinter.Listbox(lframe, height = WIN_HEIGHT, listvariable = items_var);
+
+    hscrollbar = tkinter.Scrollbar(lframe, orient = tkinter.HORIZONTAL, command =
+            items_listbox.xview);
+
+    vscrollbar = tkinter.Scrollbar(lframe, orient = tkinter.VERTICAL, command =
             items_listbox.yview);
 
-    vscrollbar.grid(column = int(items_listbox["width"]) + 5, row = 3, sticky = (tkinter.N, tkinter.S, tkinter.W, tkinter.E));
+    hscrollbar.place(x = 0, y = 0, anchor = tkinter.NW, relwidth = 1);
 
-    vscrollbar.columnconfigure(int(vscrollbar.grid_info()["column"]), weight = 1);
+    vscrollbar.place(x = 0, rely = 0.098, relheight = 0.9, anchor = tkinter.NW);
+
+    items_listbox.place(relx = 0.098, rely = 0.1, relwidth = 0.9);
+
+
 
     items_listbox.configure(yscrollcommand = vscrollbar.set);
 
-    hscrollbar = tkinter.Scrollbar(frame, width = 20, background = "black", orient = tkinter.HORIZONTAL, command =
-            items_listbox.xview);
-
-    hscrollbar.grid(row = 0, column = 0, sticky = (tkinter.N, tkinter.S, tkinter.W, tkinter.E));
-    hscrollbar.rowconfigure(0, weight = 1, pad = 5);
-    
     items_listbox.configure(xscrollcommand = hscrollbar.set);
 
-    text_space = tkinter.Canvas(frame, height = MAX_LINES, width = MAX_COLS);
+    text_space = tkinter.Canvas(rframe, height = MAX_LINES, width = MAX_COLS);
 
-    tid = text_space.create_text(0, 0, text = INTRO, font = "monospace"); 
-    text_space.grid(column = items_listbox["width"] + (5 + int(vscrollbar["width"])), row = 3, pady = 5, padx = 5);
-    text_space.itemconfigure(tid, state = "disabled");
+    tid = text_space.create_text(0, 0, text = INTRO, justify = tkinter.LEFT, font = "courier");
 
-    text_vscrollbar = tkinter.Scrollbar(frame, width = 20, orient = tkinter.VERTICAL, command =
+    text_vscrollbar = tkinter.Scrollbar(rframe, width = 20, orient = tkinter.VERTICAL, command =
             text_space.yview);
     
     text_space.configure(yscrollcommand = text_vscrollbar.set);
 
-    text_hscrollbar = tkinter.Scrollbar(frame, width = 20, orient = tkinter.HORIZONTAL, command =
+    text_hscrollbar = tkinter.Scrollbar(rframe, width = 20, orient = tkinter.HORIZONTAL, command =
             text_space.xview);
     
-    text_space.configure(xscrollcommand = text_hscrollbar.set);
-    
-    text_vscrollbar.grid(row = 3, column = int(text_space.grid_info()["column"]) + int(text_space["width"]), sticky = (tkinter.N, tkinter.S, tkinter.W, tkinter.E));
+    text_hscrollbar.place(x = 0, y = 0, relwidth = 1);
 
-    text_hscrollbar.pack(side = tkinter.RIGHT, expand = True, fill = tkinter.Y);
-    
-    text_space.bind("<Up>", lambda e: text_space.yview("scroll",
+    text_vscrollbar.place(relx = 0.005, rely = 0.098, relheight = 0.9);
+
+    text_space.place(relx = 0.098, relwidth = 0.9, relheight = 0.9);
+
+
+    text_space.configure(xscrollcommand = text_hscrollbar.set, scrollregion = text_space.bbox("all"));
+
+
+    text_space.tag_bind(tid, "<Up>", lambda e: text_space.yview("scroll",
         -1, "units"));
 
-    text_space.bind("<Down>", lambda e: text_space.yview("scroll",
+    text_space.tag_bind(tid, "<Down>", lambda e: text_space.yview("scroll",
         1, "units"));
 
-    text_space.bind("<Right>", lambda e: text_space.xview("scroll",
+    text_space.tag_bind(tid, "<Right>", lambda e: text_space.xview("scroll",
         1, "units"));
 
-    text_space.bind("<Left>", lambda e: text_space.xview("scroll",
+    text_space.tag_bind(tid, "<Left>", lambda e: text_space.xview("scroll",
         -1, "units"));
+    
+    text_space.focus();
 
+    win.bind("<MouseWheel>", onMouseScroll);
 
     #items_listbox.bind('<<ListboxSelect>>', showPopulation)
     items_listbox.bind('<Double-1>', display_content);
@@ -118,18 +127,19 @@ def main():
     SCROLL_GRAN = 120 if platform.startswith("win") else 1;
 
     def deinit():
-        nonlocal main_win, main_frame
+        nonlocal main_win, main_frame, st
+        st.set("Restart");
         main_frame.destroy();
 
     def init(win = main_win):
-        nonlocal main_win, main_frame
+        nonlocal main_win, main_frame, st
         main_frame = tkinter.ttk.Frame(main_win, takefocus = 1);
         intro_box = tkinter.ttk.Label(main_frame, text = content.ABOUT);
 
         
         intro_box.pack(fill = tkinter.BOTH, expand = True);
 
-        st_btn = tkinter.Button(main_frame, background = "green", text = "Start",
+        st_btn = tkinter.Button(main_frame, background = "green", textvariable = st,
                 font = tkinter.font.Font(family="Arial", size = 40, weight =
                     "bold"), command = command);
         st_btn.pack(fill = tkinter.BOTH, expand = True);
@@ -137,6 +147,9 @@ def main():
         main_frame.pack(fill = tkinter.BOTH, expand = True);
     
     command = lambda : start(main_win, init, deinit)
+
+    st = tkinter.StringVar();
+    st.set("Start");
 
     init();
     main_win.mainloop();
