@@ -10,10 +10,10 @@ How Tos'
   * on a linux machine:
     1. launch a terminal
     2. run `$ cd {project-directory}`
-    3. run `$./simple_stupid_cs
+    3. run `$ ./dist/ss_css.exe
   
   * on a windows machine:
-    1. navigate to the binary using file explorer
+    1. navigate to the binary under the dist folder using file explorer
     2. right-click and run
 
 PS: Please forgive this file as it probably does not comply with github conventions
